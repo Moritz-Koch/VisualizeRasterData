@@ -2,8 +2,8 @@
 Python Script to create 3 dimensional interactive raster plots
 
 :)
+![Alt Text](plots/example_plot.png)
 ![this is fine](plots/disco_glacier.gif)
-
 ## create python environment in CIP pool
 
 
