@@ -4,10 +4,10 @@ import rasterio
 import plotly.graph_objects as go
 
 ### choose glacier and resolution ##
-#glacier_data_maps = 'Rhone_data_maps'
-#res = 1
-glacier_data_maps = 'Perito_data_maps'
-res = 10
+glacier_data_maps = 'Rhone_data_maps'
+res = 1
+#glacier_data_maps = 'Perito_data_maps'
+#res = 10
 ####################################
 
 # load data maps
@@ -40,8 +40,8 @@ velocity[outlines == 0] = None
 velocity[velocity < 0] = None
 
 # creat 3D plot
-bedrock_fig = go.Surface(z=bedrock[::res, ::res], x=lat_range[::res], y=lon_range[::res], colorscale='speed_r',
-                         opacity=0.7, showlegend=True, name='bedrock',
+bedrock_fig = go.Surface(z=bedrock[::res, ::res], x=lat_range[::res], y=lon_range[::res], colorscale='speed_r'
+                         , showlegend=True, name='bedrock',
                          colorbar=dict(x=-.2, title="elevation [m]", titleside='right'))
 
 surface_fig = go.Surface(z=glacier_surface[::res, ::res], x=lat_range[::res], y=lon_range[::res], colorscale='Blues',
@@ -51,7 +51,18 @@ surface_fig = go.Surface(z=glacier_surface[::res, ::res], x=lat_range[::res], y=
 fig_dict = {"data": [bedrock_fig, surface_fig]}
 fig = go.Figure(fig_dict)
 
+# compute aspect ratio of the base
+max_bedrock = np.max(bedrock)
+min_bedrock = np.min(bedrock)
+resolution = int(lat_range[1] - lat_range[0])
+ratio_y = bedrock.shape[0] / bedrock.shape[1]
+ratio_z = (max_bedrock - min_bedrock) / (bedrock.shape[0] * resolution)
+ratio_z *= 2  # emphasize z-axis to make mountians look twice as steep
+
 fig.update_layout(title=glacier_data_maps, autosize=False, legend={'orientation': 'h'},
-                  width=1000, height=1000, scene_aspectratio={"x": 1, "y": 1, "z": .3}, )
+                  width=1000, height=1000, scene_aspectratio={"x": 1, "y": ratio_y, "z": ratio_z},
+                  scene=dict(xaxis=dict(range=[lat_range[0], lat_range[-1]]),
+                             yaxis=dict(range=[lon_range[0], lon_range[-1]]),
+                             zaxis=dict(range=[min_bedrock, max_bedrock])))
 
 fig.show()
